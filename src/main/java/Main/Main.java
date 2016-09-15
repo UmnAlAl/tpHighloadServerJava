@@ -3,6 +3,7 @@ package Main;
 import io.vertx.core.Vertx;
 import io.vertx.core.VertxOptions;
 import verticles.tcpserver.CacheConfig;
+import verticles.tcpserver.SingleVertx;
 import verticles.tcpserver.VerticleTcpServer;
 
 /**
@@ -11,11 +12,14 @@ import verticles.tcpserver.VerticleTcpServer;
 public class Main {
 
     public static void main(String[] args) {
-        Vertx vertx = Vertx.vertx();
+        Vertx vertx = SingleVertx.getInstance();
 
         CacheConfig config = Main.getCache();
 
-        vertx.deployVerticle(new VerticleTcpServer("localhost", 9095, 10, config), ar -> {
+        // D:\tcpTest\http-test-suite-master
+        // C:\Users\Installed\IdeaProjects\HighloadServer
+
+        vertx.deployVerticle(new VerticleTcpServer("localhost", 80, 4, "D:\\tcpTest\\http-test-suite-master", config), ar -> {
             System.out.println("VerticleTcpServer deployed");
         });
     }
@@ -24,12 +28,12 @@ public class Main {
         return new CacheConfig() {
             @Override
             public boolean isEnabled() {
-                return true;
+                return false;
             }
 
             @Override
             public long maximumWeight() {
-                return 1024 * 1024;
+                return 1024 * 1024 * 40;
             }
 
             @Override
@@ -44,7 +48,7 @@ public class Main {
 
             @Override
             public long maxFileSize() {
-                return 1024;
+                return 1024 * 512;
             }
 
         };

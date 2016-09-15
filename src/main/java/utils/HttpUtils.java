@@ -7,7 +7,9 @@ import java.util.*;
  */
 public class HttpUtils {
 
-    public static final String indexFile = "index.html";
+    public static final String indexFileName = "index.html";
+    public static final String indexFileExtension = "html";
+
     public static final String serverName = "JavaServer";
 
     public static final Map<Integer, String> responsCodeMsgs;
@@ -18,6 +20,7 @@ public class HttpUtils {
         responsCodeMsgs.put(403, "Forbidden");
         responsCodeMsgs.put(404, "Not Found");
         responsCodeMsgs.put(405, "Method Not Allowed");
+        responsCodeMsgs.put(415, "Unsupported Media Type");
         responsCodeMsgs.put(500, "Internal Server Error");
         responsCodeMsgs.put(501, "Not Implemented");
         responsCodeMsgs.put(505, "HTTP Version Not Supported");
@@ -38,6 +41,7 @@ public class HttpUtils {
     }
 
     public static final Map<String, String> contentTypeMap;
+    public static final Set<String> supportedFormats;
     static {
         contentTypeMap = new HashMap<>();
         contentTypeMap.put("txt", "text/plain");
@@ -49,6 +53,7 @@ public class HttpUtils {
         contentTypeMap.put("png", "image/png");
         contentTypeMap.put("gif", "image/gif");
         contentTypeMap.put("swf", "application/x-shockwave-flash");
+        supportedFormats = contentTypeMap.keySet();
     }
 
 }

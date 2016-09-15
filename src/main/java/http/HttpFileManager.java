@@ -6,6 +6,7 @@ import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import utils.HttpUtils;
 import verticles.tcpserver.CacheConfig;
+import verticles.tcpserver.SingleVertx;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -22,10 +23,10 @@ public class HttpFileManager {
     Vertx vertx;
     String documentRoot;
 
-    public HttpFileManager(int cores, CacheConfig cacheConfig, String documentRoot) {
-        this.executorService = new ForkJoinPool(cores);
+    public HttpFileManager(ExecutorService executorService, CacheConfig cacheConfig, String documentRoot) {
+        this.executorService = executorService;
         this.cacheConfig = cacheConfig;
-        this.vertx = Vertx.vertx();
+        this.vertx = SingleVertx.getInstance();
         this.documentRoot = documentRoot;
 
         this.fileCache = CacheBuilder.newBuilder()
@@ -42,7 +43,7 @@ public class HttpFileManager {
     public Future<Buffer> readFile(String path) {
 
         if(path.endsWith("/")) {
-            path += HttpUtils.indexFile;
+            path += HttpUtils.indexFileName;
         }
         path = this.documentRoot + path;
 
@@ -64,7 +65,7 @@ public class HttpFileManager {
     private Future<Buffer> readFileWithCache(String path) {
 
         Future<Buffer> resFuture = executorService.submit(() -> {
-            System.out.println(fileCache.stats().toString());
+            //System.out.println(fileCache.stats().toString());
 
             ByteArrayOutputStream fileFromCache = new ByteArrayOutputStream();
             if((fileFromCache = fileCache.getIfPresent(path)) == null) {
@@ -92,15 +93,23 @@ public class HttpFileManager {
     }
 
     public boolean checkFileExists(String path) {
-        File file = new File(documentRoot + path);
-        if(file.exists() && !file.isDirectory())
+        String realPath = documentRoot + path;
+        if(path.endsWith("/")) {
+            realPath += HttpUtils.indexFileName;
+        }
+        File file = new File(realPath);
+        if(file.exists())
             return true;
         else
             return false;
     }
 
     public long getFileLength(String path) {
-        File file = new File(documentRoot + path);
+        String realPath = documentRoot + path;
+        if(path.endsWith("/")) {
+            realPath += HttpUtils.indexFileName;
+        }
+        File file = new File(realPath);
         return file.length();
     }
 

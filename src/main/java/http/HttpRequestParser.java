@@ -17,8 +17,18 @@ public class HttpRequestParser {
     private String method;
     private String uri;
     private String version;
+    private String extension;
+    private boolean isDirectory;
 
-    public static final String test = "GET /dir1/dir2 HTTP/1.1\r\nHost: localhost\r\nConnection: keep-alive\r\nCache-Control: max-age=0\r\nAccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8\r\nUpgrade-Insecure-Requests: 1\r\n\r\n";
+    public static final String test = "GET /dir1/dir2/1.jpg?a=5 HTTP/1.1\r\nHost: localhost\r\nConnection: keep-alive\r\nCache-Control: max-age=0\r\nAccept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8\r\nUpgrade-Insecure-Requests: 1\r\n\r\n";
+
+    public HttpRequestParser() {
+        method = null;
+        uri = null;
+        version = null;
+        extension = null;
+        isDirectory = false;
+    }
 
     public void parseRequest(Buffer requestBuffer) throws HttpException {
         String requestStr = requestBuffer.toString();
@@ -56,10 +66,37 @@ public class HttpRequestParser {
             uri = uri.replace("..", "");
         }
 
-        //filter bad symbols
-        uri = uri.replaceAll("[-+.^*#%:;&@<>'`|,]","");
+        int qustChrInd = uri.lastIndexOf('?');
+        if(qustChrInd != -1) {
+            uri = uri.substring(0, qustChrInd);
+        }
 
-        //miss http/
+        //filter bad symbols
+        uri = uri.replaceAll("[+^*#%:;&@<>'`|,]","");
+
+        //get file extension and check if directory
+        int lastSlash = uri.lastIndexOf('/');
+        int lastPoint = uri.lastIndexOf('.');
+        if(uri.endsWith("/")) {
+            isDirectory = true;
+            extension = HttpUtils.indexFileExtension;
+        }
+        else {
+            isDirectory = false;
+
+            //no extension
+            if(lastSlash >= lastPoint) {
+                throw new HttpException(400, HttpUtils.responsCodeMsgs.get(400));
+            }
+            extension = uri.substring(lastPoint + 1).toLowerCase();
+
+            //unsupported extension
+            if(!HttpUtils.supportedFormats.contains(extension)) {
+                throw new HttpException(415, HttpUtils.responsCodeMsgs.get(415));
+            }
+        }
+
+        //miss HTTP/
         requestStr = requestStr.substring(requestStr.indexOf("HTTP/") + 5);
 
         //get version
@@ -87,5 +124,6 @@ public class HttpRequestParser {
     public String getUri() {return uri;}
     public String getVersion() {return version;}
     public String getMethod() {return method;}
-
+    public String getExtension() {return extension;}
+    public boolean isDirectory() {return isDirectory;}
 }
