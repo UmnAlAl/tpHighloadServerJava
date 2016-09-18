@@ -92,6 +92,18 @@ public class HttpFileManager {
         return resFuture;
     }
 
+    public long checkFileExistsAndGetLength(String path) {
+        String realPath = documentRoot + path;
+        if(path.endsWith("/")) {
+            realPath += HttpUtils.indexFileName;
+        }
+        File file = new File(realPath);
+        if(file.exists())
+            return file.length();
+        else
+            return -1;
+    }
+
     public boolean checkFileExists(String path) {
         String realPath = documentRoot + path;
         if(path.endsWith("/")) {

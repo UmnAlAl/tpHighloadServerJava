@@ -52,8 +52,6 @@ public class VerticleTcpServer extends AbstractVerticle {
                         .setUsePooledBuffers(true)
         );
 
-        System.out.println("Server created");
-
         server.connectHandler(netSocket -> {
             netSocket.handler(buffer -> {
 
@@ -85,7 +83,7 @@ public class VerticleTcpServer extends AbstractVerticle {
                                 netSocket.write(outbuffer).close();
                             }
                             else {
-                                System.out.println("Failed to read file: " + ar.cause());
+                                System.out.println("Failed: " + ar.cause());
                             }
 
                         });   //execute blocking

@@ -36,7 +36,7 @@ public class HttpResponser {
             requestUri = requestParser.getUri();
 
             //check file
-            if(!httpFileManager.checkFileExists(requestUri)) {
+            if((contentLength = httpFileManager.checkFileExistsAndGetLength(requestUri)) == -1) {
                 if(requestUri.endsWith("/")) {
                     throw new HttpException(403, HttpUtils.responsCodeMsgs.get(403));
                 }
@@ -49,7 +49,7 @@ public class HttpResponser {
             }
 
             //get content length
-            contentLength = httpFileManager.getFileLength(requestUri);
+            //contentLength = httpFileManager.getFileLength(requestUri);
 
             //get content type
             contentType = HttpUtils.contentTypeMap.get(requestParser.getExtension());
@@ -87,10 +87,10 @@ public class HttpResponser {
 
         }
         catch (HttpException ex) {
-            return processException(requestParser, ex.getCode(), ex.getMessage(), "Error.");
+            return processException(requestParser, ex.getCode(), ex.getMessage(), "Error. " + ex.getMessage());
         }
         catch (Exception ex) {
-            return processException(requestParser, 400, HttpUtils.responsCodeMsgs.get(400), "Error.");
+            return processException(requestParser, 400, HttpUtils.responsCodeMsgs.get(400), "Error. " + ex.getMessage());
         }
 
         return output;

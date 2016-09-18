@@ -1,0 +1,2 @@
+#!/bin/sh
+java -jar ./target/HighloadServer-1.0.0-jar-with-dependencies.jar -h localhost -p 80 -r C:\http-test-suite-master -c 4 -cen -cmw 52428800 -ceaam 30 -ceawm 30 -cmfsz 1048576 $@
