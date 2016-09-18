@@ -2,7 +2,6 @@ package http;
 
 import io.vertx.core.buffer.Buffer;
 import utils.HttpUtils;
-import verticles.tcpserver.CacheConfig;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -15,7 +14,7 @@ import java.util.concurrent.Future;
  */
 public class HttpResponser {
 
-    HttpFileManager httpFileManager;
+    private HttpFileManager httpFileManager;
 
     public HttpResponser(HttpFileManager httpFileManager) {
         this.httpFileManager = httpFileManager;
@@ -96,7 +95,7 @@ public class HttpResponser {
         return output;
     }
 
-    public HttpResponser addDate(Buffer input) {
+    private HttpResponser addDate(Buffer input) {
         input
                 .appendString("Date: ")
                 .appendString(getServerTime())
@@ -104,7 +103,7 @@ public class HttpResponser {
         return this;
     }
 
-    public HttpResponser addServer(Buffer input) {
+    private HttpResponser addServer(Buffer input) {
         input
                 .appendString("Server: ")
                 .appendString(HttpUtils.serverName)
@@ -112,7 +111,7 @@ public class HttpResponser {
         return this;
     }
 
-    public HttpResponser addContentLength(Buffer input, String length) {
+    private HttpResponser addContentLength(Buffer input, String length) {
         input
                 .appendString("Content-Length: ")
                 .appendString(length)
@@ -120,7 +119,7 @@ public class HttpResponser {
         return this;
     }
 
-    public HttpResponser addContentType(Buffer input, String type) {
+    private HttpResponser addContentType(Buffer input, String type) {
         input
                 .appendString("Content-type: ")
                 .appendString(type)
@@ -128,7 +127,7 @@ public class HttpResponser {
         return this;
     }
 
-    public HttpResponser addConnection(Buffer input, String connection) {
+    private HttpResponser addConnection(Buffer input, String connection) {
         input
                 .appendString("Connection: ")
                 .appendString(connection)
@@ -136,7 +135,7 @@ public class HttpResponser {
         return this;
     }
 
-    public Buffer processException(HttpRequestParser requestParser,int code, String codeExplanation, String message) {
+    private Buffer processException(HttpRequestParser requestParser, int code, String codeExplanation, String message) {
         Buffer output = Buffer.buffer().appendString("HTTP/");
 
         if(requestParser.getVersion() != null) {
@@ -165,7 +164,7 @@ public class HttpResponser {
 
     }
 
-    String getServerTime() {
+    private String getServerTime() {
         Calendar calendar = Calendar.getInstance();
         SimpleDateFormat dateFormat = new SimpleDateFormat(
                 "EEE, dd MMM yyyy HH:mm:ss z", Locale.US);

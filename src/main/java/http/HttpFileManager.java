@@ -17,11 +17,11 @@ import java.util.concurrent.*;
  */
 public class HttpFileManager {
 
-    ExecutorService executorService;
-    CacheConfig cacheConfig;
-    Cache<String, ByteArrayOutputStream> fileCache;
-    Vertx vertx;
-    String documentRoot;
+    private ExecutorService executorService;
+    private CacheConfig cacheConfig;
+    private Cache<String, ByteArrayOutputStream> fileCache;
+    private Vertx vertx;
+    private String documentRoot;
 
     public HttpFileManager(ExecutorService executorService, CacheConfig cacheConfig, String documentRoot) {
         this.executorService = executorService;

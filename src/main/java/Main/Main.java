@@ -1,8 +1,6 @@
 package Main;
 
 import io.vertx.core.Vertx;
-import io.vertx.core.VertxOptions;
-import io.vertx.core.cli.impl.DefaultParser;
 import org.apache.commons.cli.*;
 import verticles.tcpserver.CacheConfig;
 import verticles.tcpserver.SingleVertx;
@@ -46,7 +44,7 @@ public class Main {
         });
     }
 
-    public static CacheConfig getCacheConfig(CommandLine cmd) {
+    private static CacheConfig getCacheConfig(CommandLine cmd) {
         return new CacheConfig() {
             @Override
             public boolean isEnabled() {
@@ -77,7 +75,7 @@ public class Main {
 
     }
 
-    public static Options getCmdOptions() {
+    private static Options getCmdOptions() {
         /*
         * -h localhost
         * -p 80

@@ -14,16 +14,16 @@ import java.util.concurrent.*;
  */
 public class VerticleTcpServer extends AbstractVerticle {
 
-    String host;
-    int port;
-    int cores;
-    String documentRoot;
+    private String host;
+    private int port;
+    private int cores;
+    private String documentRoot;
 
-    NetServer server;
-    HttpFileManager httpFileManager;
-    ExecutorService executorService;
-    CacheConfig cacheConfig;
-    HttpResponser httpResponser;
+    private NetServer server;
+    private HttpFileManager httpFileManager;
+    private ExecutorService executorService;
+    private CacheConfig cacheConfig;
+    private HttpResponser httpResponser;
 
     public VerticleTcpServer(String host, int port, int cores, String documentRoot, CacheConfig cacheConfig) {
         this.host = host;

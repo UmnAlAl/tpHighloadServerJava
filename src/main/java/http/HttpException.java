@@ -5,7 +5,7 @@ package http;
  */
 public class HttpException extends Exception {
 
-    int code;
+    private int code;
 
     public  HttpException(int code, String message) {
         super(message);

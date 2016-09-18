@@ -6,7 +6,6 @@ import utils.HttpUtils;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Created by Installed on 11.09.2016.
@@ -32,13 +31,12 @@ public class HttpRequestParser {
 
     public void parseRequest(Buffer requestBuffer) throws HttpException {
         String requestStr = requestBuffer.toString();
-        int index = 0;
+        int index;
 
         //get method
         index = requestStr.indexOf(" ");
         method = requestStr.substring(0, index);
         requestStr = requestStr.substring(index + 1);
-        index = 0;
 
         //check method
         if(!HttpUtils.supportedMethods.contains(method)) {
@@ -49,7 +47,6 @@ public class HttpRequestParser {
         index = requestStr.indexOf(" ");
         uri = requestStr.substring(0, index);
         requestStr = requestStr.substring(index + 1);
-        index = 0;
 
         //decode uri
         if(uri.contains("%")) {
@@ -103,7 +100,6 @@ public class HttpRequestParser {
         index = requestStr.indexOf("\r\n");
         version = requestStr.substring(0, index);
         requestStr = requestStr.substring(index + 2);
-        index = 0;
 
         if(!HttpUtils.supportedHttpVersions.contains(version)) {
             throw new HttpException(505, HttpUtils.responsCodeMsgs.get(505));
