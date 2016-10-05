@@ -1,0 +1,2 @@
+#!/bin/sh
+java -XX:+DoEscapeAnalysis -XX:+UseConcMarkSweepGC -XX:+OptimizeStringConcat -XX:SurvivorRatio=8 -XX:MaxNewSize=1024m -XX:NewSize=1024m -Xms2g -Xmx2g -server -jar ./target/HighloadServer-1.0.0-jar-with-dependencies.jar -c 4 -r D:\tcpTest\http-test-suite-master -h localhost -p 80 -cen -cmw 1073741824 -ceaam 30 -ceawm 30 -cmfsz 10485780 $@

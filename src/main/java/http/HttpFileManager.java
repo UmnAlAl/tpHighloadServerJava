@@ -2,7 +2,7 @@ package http;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import io.vertx.core.Vertx;
+import io.vertx.core.*;
 import io.vertx.core.buffer.Buffer;
 import utils.HttpUtils;
 import verticles.tcpserver.CacheConfig;
@@ -17,14 +17,12 @@ import java.util.concurrent.*;
  */
 public class HttpFileManager {
 
-    private ExecutorService executorService;
     private CacheConfig cacheConfig;
-    private Cache<String, ByteArrayOutputStream> fileCache;
+    private Cache<String, Buffer> fileCache;
     private Vertx vertx;
     private String documentRoot;
 
-    public HttpFileManager(ExecutorService executorService, CacheConfig cacheConfig, String documentRoot) {
-        this.executorService = executorService;
+    public HttpFileManager(CacheConfig cacheConfig, String documentRoot) {
         this.cacheConfig = cacheConfig;
         this.vertx = SingleVertx.getInstance();
         this.documentRoot = documentRoot;
@@ -33,14 +31,17 @@ public class HttpFileManager {
                 .expireAfterAccess(cacheConfig.expireAfterAccessMinutes(), TimeUnit.MINUTES)
                 .expireAfterWrite(cacheConfig.expireAfterWriteMinutes(), TimeUnit.MINUTES)
                 .maximumWeight(cacheConfig.maximumWeight())
-                .weigher((String s, ByteArrayOutputStream buf) -> {
-                    return buf.size();
+                .weigher((String s, Buffer buf) -> {
+                    return buf.length();
                 })
                 .recordStats()
+                .softValues()
+                //.weakKeys()
+                //.weakValues()
                 .build();
     }
 
-    public Future<Buffer> readFile(String path) {
+    public Buffer readFile(String path) {
 
         if(path.endsWith("/")) {
             path += HttpUtils.indexFileName;
@@ -55,41 +56,31 @@ public class HttpFileManager {
         }
     }
 
-    private Future<Buffer> readFileDirectly(String path) {
-        Future<Buffer> resFuture = executorService.submit(() -> {
-            return vertx.fileSystem().readFileBlocking(path);
-        });
-        return resFuture;
+    private Buffer readFileDirectly(String path) {
+        return vertx.fileSystem().readFileBlocking(path);
     }
 
-    private Future<Buffer> readFileWithCache(String path) {
+    private Buffer readFileWithCache(String path) {
 
-        Future<Buffer> resFuture = executorService.submit(() -> {
-            //System.out.println(fileCache.stats().toString());
+        Buffer fileFromCache = null;
+        //System.out.println(fileCache.stats() + String.valueOf(fileCache.stats().hitRate()));
+        if((fileFromCache = fileCache.getIfPresent(path)) == null) {
 
-            ByteArrayOutputStream fileFromCache = new ByteArrayOutputStream();
-            if((fileFromCache = fileCache.getIfPresent(path)) == null) {
-
-                try {
-                    Buffer readedFile = vertx.fileSystem().readFileBlocking(path);
-                    if(readedFile.length() <= cacheConfig.maxFileSize()) {
-                        ByteArrayOutputStream streamToCache = new ByteArrayOutputStream(readedFile.length());
-                        streamToCache.write(readedFile.getBytes());
-                        fileCache.put(path, streamToCache);
-                    }
-                    return readedFile;
+            try {
+                Buffer readedFile = vertx.fileSystem().readFileBlocking(path);
+                if(readedFile.length() <= cacheConfig.maxFileSize()) {
+                    fileCache.put(path, readedFile);
                 }
-                catch (Exception ex) {
-                    return null;
-                }
-
+                return readedFile;
             }
-            else {
-                return Buffer.buffer().appendBytes(fileFromCache.toByteArray());
+            catch (Exception ex) {
+                return null;
             }
 
-        });
-        return resFuture;
+        }
+        else {
+            return fileFromCache;
+        }
     }
 
     public long checkFileExistsAndGetLength(String path) {

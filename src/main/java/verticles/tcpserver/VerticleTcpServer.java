@@ -3,6 +3,7 @@ package verticles.tcpserver;
 import http.HttpFileManager;
 import http.HttpResponser;
 import io.vertx.core.AbstractVerticle;
+import io.vertx.core.WorkerExecutor;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.net.NetServer;
 import io.vertx.core.net.NetServerOptions;
@@ -21,7 +22,7 @@ public class VerticleTcpServer extends AbstractVerticle {
 
     private NetServer server;
     private HttpFileManager httpFileManager;
-    private ExecutorService executorService;
+    private WorkerExecutor executorService;
     private CacheConfig cacheConfig;
     private HttpResponser httpResponser;
 
@@ -36,31 +37,29 @@ public class VerticleTcpServer extends AbstractVerticle {
     @Override
     public void start() throws Exception {
 
-        executorService = Executors.newWorkStealingPool(cores);
-        //executorService = new ForkJoinPool(cores);
-        httpFileManager = new HttpFileManager(executorService, cacheConfig, documentRoot);
+        //executorService = Executors.newCachedThreadPool();
+        //executorService = new ThreadPoolExecutor(1, 1, 2, TimeUnit.MINUTES, new ArrayBlockingQueue<Runnable>(1000));
+        executorService = vertx.createSharedWorkerExecutor("myExecutor", 2 * cores, 120000);
+        httpFileManager = new HttpFileManager(cacheConfig, documentRoot);
         httpResponser = new HttpResponser(httpFileManager);
 
         server = vertx.createNetServer(
                 new NetServerOptions()
                         .setPort(port)
                         .setHost(host)
-                //        .setIdleTimeout(3)
+                //        .setIdleTimeout(1)
                 //        .setReceiveBufferSize(10 * 1024 * 1024)
                 //        .setSendBufferSize(10 * 1024 * 1024)
-                //        .setTcpNoDelay(true)
+                //       .setTcpNoDelay(true)
                         .setUsePooledBuffers(true)
         );
 
         server.connectHandler(netSocket -> {
             netSocket.handler(buffer -> {
 
-                vertx.executeBlocking(future -> {
+                executorService.executeBlocking(future -> {
                             try {
-                                Future<Buffer> futureResult = executorService.submit(() -> {
-                                    return httpResponser.processRequest(buffer);
-                                });
-                                future.complete(futureResult.get());
+                                future.complete(httpResponser.processRequest(buffer));
                             }
                             catch (Exception ex) {
                                 future.fail(ex.getCause());

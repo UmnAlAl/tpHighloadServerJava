@@ -26,7 +26,7 @@ public class HttpResponser {
 
         HttpRequestParser requestParser = new HttpRequestParser();
         String requestUri = null;
-        Future<Buffer> futureFile = null;
+        Buffer file = null;
         boolean isGet = false;
         long contentLength = 0;
         String contentType;
@@ -44,7 +44,7 @@ public class HttpResponser {
 
             //if method GET - start reading file
             if(isGet = requestParser.getMethod().equals("GET")) {
-                futureFile = httpFileManager.readFile(requestUri);
+                file = httpFileManager.readFile(requestUri);
             }
 
             //get content length
@@ -75,7 +75,7 @@ public class HttpResponser {
             //if get then append file
             if(isGet) {
                 try {
-                    output.appendBuffer(futureFile.get());
+                    output.appendBuffer(file);
                 }
                 catch (Exception ex) {
                     //couldnt read the file

@@ -68,7 +68,7 @@ public class Main {
 
             @Override
             public long maxFileSize() {
-                return Long.parseLong(cmd.getOptionValue("ccmfsz", "524288"));
+                return Long.parseLong(cmd.getOptionValue("cmfsz", "524288"));
             }
 
         };
